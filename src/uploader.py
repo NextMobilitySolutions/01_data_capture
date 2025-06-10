@@ -29,12 +29,11 @@ def upload_zip_to_gcs(zip_path, target_path):
         image_files = [f for f in zip_ref.namelist() if f.lower().endswith((".jpg", ".jpeg", ".png"))]
 
         print(f"{len(image_files)} imágenes encontradas en el ZIP. Subiendo a: gs://{BUCKET_NAME}/{target_path}/")
-
         for img_name in image_files:
             with zip_ref.open(img_name) as img_file:
-                # Nombre relativo dentro del ZIP (sin prefijos redundantes).
-                relative_path = Path(img_name).name if '/' not in img_name else Path(*Path(img_name).parts[1:])
-                blob_path = f"{target_path}/{relative_path}".replace("\\", "/")  # compatible con Windows
+                # Mantener toda la ruta relativa tal como está en el ZIP
+                relative_path = Path(img_name)
+                blob_path = f"{target_path}/{relative_path}".replace("\\", "/")
 
                 blob = bucket.blob(blob_path)
                 blob.upload_from_file(img_file, content_type="image/jpeg")
